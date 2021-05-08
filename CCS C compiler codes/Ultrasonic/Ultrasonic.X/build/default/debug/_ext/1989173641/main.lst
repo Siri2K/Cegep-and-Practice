@@ -1,0 +1,653 @@
+CCS PCM C Compiler, Version 5.017, 8924               13-May-20 17:59
+
+               Filename:   F:\College 6\Data and Acquistion\Ultrasonic\Code\Ultrasonic.X\build\default\debug\_ext\1989173641\main.lst
+
+               ROM used:   436 words (5%)
+                           Largest free fragment is 2048
+               RAM used:   12 (3%) at main() level
+                           24 (7%) worst case
+               Stack used: 5 locations
+               Stack size: 7
+
+*
+0000:  NOP
+0001:  MOVLW  01
+0002:  MOVWF  0A
+0003:  GOTO   188
+.................... #include <main.h> 
+.................... #include <16F887.h> 
+.................... //////////// Standard Header file for the PIC16F887 device //////////////// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996, 2013 Custom Computer Services          //// 
+.................... //// This source code may only be used by licensed users of the CCS C  //// 
+.................... //// compiler.  This source code may only be distributed to other      //// 
+.................... //// licensed users of the CCS C compiler.  No other use, reproduction //// 
+.................... //// or distribution is permitted without written permission.          //// 
+.................... //// Derivative programs created using this software in object code    //// 
+.................... //// form are not restricted in any way.                               //// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... #device PIC16F887 
+*
+0051:  CLRF   78
+0052:  CLRF   79
+0053:  CLRF   77
+0054:  CLRF   7A
+0055:  MOVF   31,W
+0056:  BTFSS  03.2
+0057:  GOTO   05B
+0058:  MOVF   30,W
+0059:  BTFSC  03.2
+005A:  GOTO   075
+005B:  MOVLW  10
+005C:  MOVWF  32
+005D:  BCF    03.0
+005E:  RLF    2E,F
+005F:  RLF    2F,F
+0060:  RLF    77,F
+0061:  RLF    7A,F
+0062:  MOVF   31,W
+0063:  SUBWF  7A,W
+0064:  BTFSS  03.2
+0065:  GOTO   068
+0066:  MOVF   30,W
+0067:  SUBWF  77,W
+0068:  BTFSS  03.0
+0069:  GOTO   071
+006A:  MOVF   30,W
+006B:  SUBWF  77,F
+006C:  BTFSS  03.0
+006D:  DECF   7A,F
+006E:  MOVF   31,W
+006F:  SUBWF  7A,F
+0070:  BSF    03.0
+0071:  RLF    78,F
+0072:  RLF    79,F
+0073:  DECFSZ 32,F
+0074:  GOTO   05D
+0075:  RETURN
+....................  
+.................... #list 
+....................  
+.................... #device ADC=16 
+....................  
+.................... #FUSES NOWDT                 	//No Watch Dog Timer 
+.................... #FUSES NOBROWNOUT            	//No brownout reset 
+.................... #FUSES NOLVP                 	//No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+....................  
+.................... #use delay(crystal=20000000) 
+*
+0004:  MOVLW  2F
+0005:  MOVWF  04
+0006:  BCF    03.7
+0007:  MOVF   00,W
+0008:  BTFSC  03.2
+0009:  GOTO   017
+000A:  MOVLW  06
+000B:  MOVWF  78
+000C:  CLRF   77
+000D:  DECFSZ 77,F
+000E:  GOTO   00D
+000F:  DECFSZ 78,F
+0010:  GOTO   00C
+0011:  MOVLW  7B
+0012:  MOVWF  77
+0013:  DECFSZ 77,F
+0014:  GOTO   013
+0015:  DECFSZ 00,F
+0016:  GOTO   00A
+0017:  RETURN
+....................  
+....................  
+.................... #include <LCD write.h> //LCD header file 
+.................... #byte TRISD = 0x88 
+.................... #byte PORTD = 0x08 
+.................... int ot,h,t,o; 
+....................  
+.................... void pulse (void); // Enable pin Pulse function 
+....................  
+.................... // LCD NIbble mode 
+.................... void com_split_byte (int data_val); // Split byte function for RS = 0 -- LCD command mode 
+.................... void com_set_pins(int data_val); // Set_pins function when RS = 0 -- LCD command mode 
+.................... void char_split_byte (int data_val);// Split byte function for RS = 1 -- LCD character mode 
+.................... void char_set_pins(int data_val);  // Set_pins function when RS = 1 -- LCD character mode 
+....................  
+.................... // LCD commands and character 
+.................... void Initialize (void); // Functiion to setup to write to the LCD 
+.................... void LCD_clear (void); // Command to clear all LCD display 
+.................... void number (int16 num); // Function to write the number     
+....................  
+.................... void pulse (void)  
+.................... { 
+.................... delay_ms(10); 
+0018:  MOVLW  0A
+0019:  MOVWF  2F
+001A:  CALL   004
+.................... PORTD = PORTD & 0xBF; // PORTD = xxxx xxxx AND x0xx xxxx = x0xx xxxx -- EN = 0 
+001B:  BCF    08.6
+.................... delay_ms(10); 
+001C:  MOVLW  0A
+001D:  MOVWF  2F
+001E:  CALL   004
+001F:  RETURN
+.................... } 
+....................  
+.................... void com_split_byte (int data_val) 
+.................... { 
+.................... com_set_pins ((data_val & 0xf0)>>4); // Data_val = (xxxx xxxx AND 1111 0000) >>4 = xxxx 0000 >>4 = 0000 xxxx -- Most significant 4 bits 
+*
+0025:  MOVF   26,W
+0026:  ANDLW  F0
+0027:  MOVWF  77
+0028:  SWAPF  77,W
+0029:  MOVWF  27
+002A:  MOVLW  0F
+002B:  ANDWF  27,F
+002C:  MOVF   27,W
+002D:  MOVWF  28
+002E:  CALL   020
+.................... delay_ms(20); 
+002F:  MOVLW  14
+0030:  MOVWF  2F
+0031:  CALL   004
+.................... com_set_pins (data_val & 0x0f); // Data_val = xxxx xxxx AND 0000 1111 = 0000 xxxx -- Least Significant 4 bits 
+0032:  MOVF   26,W
+0033:  ANDLW  0F
+0034:  MOVWF  27
+0035:  MOVWF  28
+0036:  CALL   020
+.................... delay_ms(20); 
+0037:  MOVLW  14
+0038:  MOVWF  2F
+0039:  CALL   004
+003A:  RETURN
+.................... } 
+....................  
+.................... void com_set_pins(int data_val) 
+.................... { 
+.................... PORTD = data_val | 0x40; // xxxx xxxx OR x1x0 xxxx = x1x0 xxxx --- EN = 1 and RS = 0 
+*
+0020:  MOVF   28,W
+0021:  IORLW  40
+0022:  MOVWF  08
+.................... pulse();  
+0023:  CALL   018
+0024:  RETURN
+.................... } 
+....................  
+.................... void char_split_byte (int data_val) 
+.................... { 
+.................... char_set_pins ((data_val & 0xf0)>>4); // Data_val = (xxxx xxxx AND 1111 0000) >>4 = xxxx 0000 >>4 = 0000 xxxx -- Most significant 4 bits 
+*
+007B:  MOVF   2C,W
+007C:  ANDLW  F0
+007D:  MOVWF  77
+007E:  SWAPF  77,W
+007F:  MOVWF  2D
+0080:  MOVLW  0F
+0081:  ANDWF  2D,F
+0082:  MOVF   2D,W
+0083:  MOVWF  2E
+0084:  CALL   076
+.................... delay_ms(20); 
+0085:  MOVLW  14
+0086:  MOVWF  2F
+0087:  CALL   004
+.................... char_set_pins (data_val & 0x0f); // Data_val = xxxx xxxx AND 0000 1111 = 0000 xxxx -- Least Significant 4 bits 
+0088:  MOVF   2C,W
+0089:  ANDLW  0F
+008A:  MOVWF  2D
+008B:  MOVWF  2E
+008C:  CALL   076
+.................... delay_ms(20); 
+008D:  MOVLW  14
+008E:  MOVWF  2F
+008F:  CALL   004
+0090:  RETURN
+.................... } 
+....................  
+.................... void char_set_pins(int data_val) 
+.................... { 
+.................... PORTD = data_val | 0x50; // xxxx xxxx OR x1x1 xxxx = x1x1 xxxx --- EN = 1 and RS = 1 
+*
+0076:  MOVF   2E,W
+0077:  IORLW  50
+0078:  MOVWF  08
+.................... pulse();  
+0079:  CALL   018
+007A:  RETURN
+.................... } 
+....................  
+.................... void Initialize (void) 
+.................... { 
+.................... com_split_byte(0x03); // Command for Cursor 
+*
+003B:  MOVLW  03
+003C:  MOVWF  26
+003D:  CALL   025
+.................... com_split_byte(0x03);  
+003E:  MOVLW  03
+003F:  MOVWF  26
+0040:  CALL   025
+.................... com_split_byte(0x03); 
+0041:  MOVLW  03
+0042:  MOVWF  26
+0043:  CALL   025
+.................... com_split_byte(0x02); // Command to Display  
+0044:  MOVLW  02
+0045:  MOVWF  26
+0046:  CALL   025
+.................... com_split_byte(0x0F); // Display Cursor 
+0047:  MOVLW  0F
+0048:  MOVWF  26
+0049:  CALL   025
+004A:  BCF    0A.3
+004B:  BCF    0A.4
+004C:  GOTO   1A5 (RETURN)
+.................... } 
+....................  
+.................... void LCD_clear (void) 
+.................... { 
+.................... com_split_byte(0x01); 
+004D:  MOVLW  01
+004E:  MOVWF  26
+004F:  CALL   025
+0050:  RETURN
+.................... } 
+....................  
+.................... void number (int16 num) // loop meant to zero out the counter at a given numerical value 
+.................... { 
+.................... ot = 0x30+ num/1000; 
+*
+012D:  MOVF   2B,W
+012E:  MOVWF  2F
+012F:  MOVF   2A,W
+0130:  MOVWF  2E
+0131:  MOVLW  03
+0132:  MOVWF  31
+0133:  MOVLW  E8
+0134:  MOVWF  30
+0135:  CALL   051
+0136:  MOVF   78,W
+0137:  ADDLW  30
+0138:  MOVWF  20
+.................... h  = 0x30+ (num%1000)/100; 
+0139:  MOVF   2B,W
+013A:  MOVWF  2F
+013B:  MOVF   2A,W
+013C:  MOVWF  2E
+013D:  MOVLW  03
+013E:  MOVWF  31
+013F:  MOVLW  E8
+0140:  MOVWF  30
+0141:  CALL   051
+0142:  MOVF   77,W
+0143:  MOVWF  2C
+0144:  MOVF   7A,W
+0145:  MOVWF  2D
+0146:  MOVWF  2F
+0147:  MOVF   77,W
+0148:  MOVWF  2E
+0149:  CLRF   31
+014A:  MOVLW  64
+014B:  MOVWF  30
+014C:  CALL   051
+014D:  MOVF   78,W
+014E:  ADDLW  30
+014F:  MOVWF  21
+.................... t  = 0x30+ (num%100)/10; 
+0150:  MOVF   2B,W
+0151:  MOVWF  2F
+0152:  MOVF   2A,W
+0153:  MOVWF  2E
+0154:  CLRF   31
+0155:  MOVLW  64
+0156:  MOVWF  30
+0157:  CALL   051
+0158:  MOVF   77,W
+0159:  MOVWF  2C
+015A:  MOVF   7A,W
+015B:  MOVWF  2D
+015C:  MOVWF  2F
+015D:  MOVF   77,W
+015E:  MOVWF  2E
+015F:  CLRF   31
+0160:  MOVLW  0A
+0161:  MOVWF  30
+0162:  CALL   051
+0163:  MOVF   78,W
+0164:  ADDLW  30
+0165:  MOVWF  22
+.................... o  = 0x30+ (num%10); 
+0166:  MOVF   2B,W
+0167:  MOVWF  2F
+0168:  MOVF   2A,W
+0169:  MOVWF  2E
+016A:  CLRF   31
+016B:  MOVLW  0A
+016C:  MOVWF  30
+016D:  CALL   051
+016E:  MOVF   77,W
+016F:  ADDLW  30
+0170:  MOVWF  23
+....................  
+.................... char_split_byte(ot); 
+0171:  MOVF   20,W
+0172:  MOVWF  2C
+0173:  CALL   07B
+.................... char_split_byte(h); 
+0174:  MOVF   21,W
+0175:  MOVWF  2C
+0176:  CALL   07B
+.................... char_split_byte(t); 
+0177:  MOVF   22,W
+0178:  MOVWF  2C
+0179:  CALL   07B
+.................... char_split_byte(o); 
+017A:  MOVF   23,W
+017B:  MOVWF  2C
+017C:  CALL   07B
+017D:  NOP
+....................  
+.................... } 
+....................  
+....................  
+.................... #define NO_Echo 1000 
+.................... #define Too_far 50000  
+....................  
+.................... #byte TRISB = 0x86  
+.................... #byte PORTB = 0x06 // PORT used for ultrasonic 
+.................... #bit Trigger = 0x6.0 // Trigger pin 
+.................... #bit Echo = 0x6.1 // Echo pin 
+.................... #bit Sys_Error = 0x6.2 // LED signalling that there is an error 
+.................... #bit out_of_range = 0x6.3 // LED signaling object is out of range 
+....................  
+.................... int16 distance; // Object Distance variable 
+....................  
+.................... void Detection (void); // Ultrasonic detection loop 
+.................... void Ultrasonic_Pulse(void); // Trigger pulse function 
+.................... void Sensor(int16 sensor_val); // LCD object distance display function  
+....................  
+.................... void main(void) 
+*
+0188:  MOVF   03,W
+0189:  ANDLW  1F
+018A:  MOVWF  03
+018B:  BSF    03.5
+018C:  BSF    03.6
+018D:  MOVF   09,W
+018E:  ANDLW  C0
+018F:  MOVWF  09
+0190:  BCF    03.6
+0191:  BCF    1F.4
+0192:  BCF    1F.5
+0193:  MOVLW  00
+0194:  BSF    03.6
+0195:  MOVWF  08
+0196:  BCF    03.5
+0197:  CLRF   07
+0198:  CLRF   08
+0199:  CLRF   09
+019A:  BCF    03.7
+.................... { 
+.................... TRISB = 0xF2; // Ultrasonincs sensor pin ---> 1111 0010 ---> B0,B5,B7 are output pins 
+019B:  MOVLW  F2
+019C:  BSF    03.5
+019D:  BCF    03.6
+019E:  MOVWF  06
+.................... TRISD = 0xA0; // LCD output pin setup ---> 1010 0000 ---> D7 and D5 are not used 
+019F:  MOVLW  A0
+01A0:  MOVWF  08
+....................  
+.................... setup_timer_1(T1_INTERNAL|T1_DIV_BY_4); //52.4 ms overflow 
+01A1:  MOVLW  25
+01A2:  BCF    03.5
+01A3:  MOVWF  10
+....................  
+.................... Initialize(); // INitialize LCD and setup character dispaly 
+01A4:  GOTO   03B
+.................... LCD_clear(); // Clear LCD screen 
+01A5:  CALL   04D
+.................... delay_ms(100); 
+01A6:  MOVLW  64
+01A7:  MOVWF  2F
+01A8:  CALL   004
+....................  
+....................    while(TRUE) 
+....................    { 
+....................    Detection();  
+01A9:  GOTO   091
+....................    delay_ms(500); 
+01AA:  MOVLW  02
+01AB:  MOVWF  26
+01AC:  MOVLW  FA
+01AD:  MOVWF  2F
+01AE:  CALL   004
+01AF:  DECFSZ 26,F
+01B0:  GOTO   1AC
+....................    LCD_clear(); 
+01B1:  CALL   04D
+01B2:  GOTO   1A9
+....................    } 
+.................... } 
+....................  
+01B3:  GOTO   1B3
+.................... void Detection (void) 
+.................... { 
+.................... Sys_Error=0;  
+*
+0091:  BCF    06.2
+.................... Ultrasonic_Pulse(); 
+.................... set_timer1(0); //Reset timer 
+*
+00A0:  CLRF   0E
+00A1:  CLRF   0F
+00A2:  CLRF   0E
+....................  
+....................    while ((Echo == 0) && (get_timer1() < NO_Echo)); // Lock here, when Echo is 0 
+00A3:  BTFSC  06.1
+00A4:  GOTO   0BB
+00A5:  MOVF   0F,W
+00A6:  MOVWF  7A
+00A7:  MOVF   0E,W
+00A8:  MOVWF  77
+00A9:  MOVF   0F,W
+00AA:  SUBWF  7A,W
+00AB:  BTFSS  03.2
+00AC:  GOTO   0A5
+00AD:  MOVF   77,W
+00AE:  MOVWF  27
+00AF:  MOVF   7A,W
+00B0:  MOVWF  28
+00B1:  MOVF   28,W
+00B2:  SUBLW  03
+00B3:  BTFSS  03.0
+00B4:  GOTO   0BB
+00B5:  BTFSS  03.2
+00B6:  GOTO   0A3
+00B7:  MOVF   27,W
+00B8:  SUBLW  E7
+00B9:  BTFSC  03.0
+00BA:  GOTO   0A3
+....................    if(get_timer1() > NO_Echo) // Error if timer value  occur when Echo = 0 
+00BB:  MOVF   0F,W
+00BC:  MOVWF  7A
+00BD:  MOVF   0E,W
+00BE:  MOVWF  77
+00BF:  MOVF   0F,W
+00C0:  SUBWF  7A,W
+00C1:  BTFSS  03.2
+00C2:  GOTO   0BB
+00C3:  MOVF   77,W
+00C4:  MOVWF  26
+00C5:  MOVF   7A,W
+00C6:  MOVWF  27
+00C7:  MOVF   27,W
+00C8:  SUBLW  02
+00C9:  BTFSC  03.0
+00CA:  GOTO   0D2
+00CB:  XORLW  FF
+00CC:  BTFSS  03.2
+00CD:  GOTO   0D1
+00CE:  MOVF   26,W
+00CF:  SUBLW  E8
+00D0:  BTFSS  03.0
+....................    { 
+....................    Sys_Error = 1; 
+00D1:  BSF    06.2
+....................    } 
+....................    set_timer1(0); 
+00D2:  CLRF   0E
+00D3:  CLRF   0F
+00D4:  CLRF   0E
+....................     
+....................    if (Sys_Error == 0) 
+00D5:  BTFSC  06.2
+00D6:  GOTO   185
+....................    { 
+....................    while ((Echo == 1) && (get_timer1() < Too_far)); 
+00D7:  BTFSS  06.1
+00D8:  GOTO   0EF
+00D9:  MOVF   0F,W
+00DA:  MOVWF  7A
+00DB:  MOVF   0E,W
+00DC:  MOVWF  77
+00DD:  MOVF   0F,W
+00DE:  SUBWF  7A,W
+00DF:  BTFSS  03.2
+00E0:  GOTO   0D9
+00E1:  MOVF   77,W
+00E2:  MOVWF  27
+00E3:  MOVF   7A,W
+00E4:  MOVWF  28
+00E5:  MOVF   28,W
+00E6:  SUBLW  C3
+00E7:  BTFSS  03.0
+00E8:  GOTO   0EF
+00E9:  BTFSS  03.2
+00EA:  GOTO   0D7
+00EB:  MOVF   27,W
+00EC:  SUBLW  4F
+00ED:  BTFSC  03.0
+00EE:  GOTO   0D7
+....................    if(get_timer1() > Too_far) 
+00EF:  MOVF   0F,W
+00F0:  MOVWF  7A
+00F1:  MOVF   0E,W
+00F2:  MOVWF  77
+00F3:  MOVF   0F,W
+00F4:  SUBWF  7A,W
+00F5:  BTFSS  03.2
+00F6:  GOTO   0EF
+00F7:  MOVF   77,W
+00F8:  MOVWF  26
+00F9:  MOVF   7A,W
+00FA:  MOVWF  27
+00FB:  MOVF   27,W
+00FC:  SUBLW  C2
+00FD:  BTFSC  03.0
+00FE:  GOTO   108
+00FF:  XORLW  FF
+0100:  BTFSS  03.2
+0101:  GOTO   106
+0102:  MOVF   26,W
+0103:  SUBLW  50
+0104:  BTFSC  03.0
+0105:  GOTO   108
+....................    { 
+....................    out_of_range = 1; 
+0106:  BSF    06.3
+....................    } 
+0107:  GOTO   109
+....................     
+....................    else 
+....................    out_of_range = 0; 
+0108:  BCF    06.3
+....................    Sensor(get_timer1()); // Dsiplay value to LCD 
+0109:  MOVF   0F,W
+010A:  MOVWF  7A
+010B:  MOVF   0E,W
+010C:  MOVWF  77
+010D:  MOVF   0F,W
+010E:  SUBWF  7A,W
+010F:  BTFSS  03.2
+0110:  GOTO   109
+0111:  MOVF   77,W
+0112:  MOVWF  26
+0113:  MOVF   7A,W
+0114:  MOVWF  27
+0115:  MOVF   27,W
+0116:  MOVWF  29
+0117:  MOVF   26,W
+0118:  MOVWF  28
+....................    }   
+*
+0185:  BCF    0A.3
+0186:  BCF    0A.4
+0187:  GOTO   1AA (RETURN)
+.................... } 
+....................  
+.................... void Ultrasonic_Pulse(void) // Ultrasonic 10ms trigger pulse 
+.................... { 
+.................... Trigger = 0; 
+*
+0092:  BCF    06.0
+.................... delay_us(5); 
+0093:  MOVLW  07
+0094:  MOVWF  77
+0095:  DECFSZ 77,F
+0096:  GOTO   095
+0097:  GOTO   098
+0098:  NOP
+.................... Trigger = 1; 
+0099:  BSF    06.0
+.................... delay_us(5); 
+009A:  MOVLW  07
+009B:  MOVWF  77
+009C:  DECFSZ 77,F
+009D:  GOTO   09C
+009E:  GOTO   09F
+009F:  NOP
+.................... } 
+....................  
+.................... void Sensor(int16 sensor_val) 
+.................... { 
+.................... distance = sensor_val*2/15; // Convert timer_value to distance 
+*
+0119:  BCF    03.0
+011A:  RLF    28,W
+011B:  MOVWF  2A
+011C:  RLF    29,W
+011D:  MOVWF  2B
+011E:  MOVWF  2F
+011F:  MOVF   2A,W
+0120:  MOVWF  2E
+0121:  CLRF   31
+0122:  MOVLW  0F
+0123:  MOVWF  30
+0124:  CALL   051
+0125:  MOVF   79,W
+0126:  MOVWF  25
+0127:  MOVF   78,W
+0128:  MOVWF  24
+.................... number(distance); // Display 
+0129:  MOVF   25,W
+012A:  MOVWF  2B
+012B:  MOVF   24,W
+012C:  MOVWF  2A
+.................... char_split_byte (0x6d); // Character for mm 
+*
+017E:  MOVLW  6D
+017F:  MOVWF  2C
+0180:  CALL   07B
+.................... char_split_byte (0x6d); // Character for mm 
+0181:  MOVLW  6D
+0182:  MOVWF  2C
+0183:  CALL   07B
+0184:  NOP
+.................... } 
+
+Configuration Fuses:
+   Word  1: 0CF2   HS NOWDT NOPUT MCLR NOPROTECT NOCPD NOBROWNOUT IESO FCMEN NOLVP DEBUG
+   Word  2: 3FFF   BORV40 NOWRT
+
+   Some fuses have been forced to be compatible with the ICD debugger.
