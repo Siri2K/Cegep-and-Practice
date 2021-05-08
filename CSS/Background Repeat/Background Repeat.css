@@ -1,0 +1,14 @@
+body 
+{
+background-image: url("http://www.sololearn.com/uploads/css_logo.png");
+background-repeat: repeat-x;
+/*
+background-repeat: repeat-y;
+
+background-repeat: inherit;
+margin-top: 100px;
+padding: 40px;
+
+
+*/
+}
