@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Working_with_numbers
+namespace C__codes
 {
-    class Program
-    {
+    class  Program{
         static void Main(string[] args)
         {
             double number;

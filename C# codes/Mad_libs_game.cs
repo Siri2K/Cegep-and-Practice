@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Building_a_Mad_Libs_Game
+namespace C__codes
 {
-    class Program
-    {
+    class  Program{
         static void Main(string[] args)
         {
             // String

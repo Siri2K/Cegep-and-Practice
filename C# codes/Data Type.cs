@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Data_Type
+namespace C__codes
 {
-    class Program
-    {
+    class  Program{
         static void Main(string[] args)
         {
             // Type of data

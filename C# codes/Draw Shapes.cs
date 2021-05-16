@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace DrawingShape
+namespace C__codes
 {
-    class Program
-    {
+    class  Program{
         static void Main(string[] args)
         {
             Console.WriteLine("   /|");

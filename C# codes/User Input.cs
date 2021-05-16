@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Getting_User_Input
+namespace C__codes
 {
-    class Program
-    {
+    class  Program{
         static void Main(string[] args)
         {
             // Strings
